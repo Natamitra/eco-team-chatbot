@@ -14,7 +14,7 @@ export const auth = betterAuth({
       const { Resend } = await import("resend");
       const resend = new Resend(process.env.RESEND_API_KEY);
       await resend.emails.send({
-        from: "onboarding@eco-team.net",
+        from: "onboarding@resend.dev",
         to: email,
         subject: "Twój kod logowania - ECO-TEAM",
         html: `<p>Twój kod logowania: <strong>${otp}</strong></p><p>Kod jest ważny przez 10 minut.</p>`,
