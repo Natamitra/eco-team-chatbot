@@ -1,14 +1,24 @@
 "use client";
 import { useState } from "react";
 
+const PRZYKŁADOWE_PYTANIA = [
+  "Kiedy dostanę pierwszą wypłatę?",
+  "Jakie mam benefity sportowe?",
+  "Jak zgłosić nieobecność?",
+  "Czym zajmuje się firma ECO-TEAM?",
+  "Kto jest odpowiedzialny za sprawy kadrowe?",
+  "Jakie są zasady korzystania z samochodu służbowego?",
+];
+
 export default function Home() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-    const userMessage = { role: "user", content: input };
+  const sendMessage = async (text?: string) => {
+    const tresc = text || input;
+    if (!tresc.trim()) return;
+    const userMessage = { role: "user", content: tresc };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
@@ -38,23 +48,34 @@ export default function Home() {
       {/* Wiadomości */}
       <div style={{ flex: 1, overflowY: "auto", padding: 24, display: "flex", flexDirection: "column", gap: 12 }}>
         {messages.length === 0 && (
-          <div style={{ textAlign: "center", color: "#888", marginTop: 60 }}>
+          <div style={{ textAlign: "center", marginTop: 40 }}>
             <div style={{ fontSize: 48 }}>🌿</div>
-            <p style={{ fontSize: 16, marginTop: 12 }}>Cześć! Jestem Twoim asystentem onboardingowym ECO-TEAM.</p>
-            <p style={{ fontSize: 14 }}>Zapytaj mnie o cokolwiek!</p>
+            <p style={{ fontSize: 16, marginTop: 12, color: "#444" }}>Cześć! Jestem Twoim asystentem w ECO-TEAM.</p>
+            <p style={{ fontSize: 14, color: "#888", marginBottom: 24 }}>Możesz zapytać mnie o cokolwiek lub wybrać pytanie poniżej:</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", maxWidth: 500, margin: "0 auto" }}>
+              {PRZYKŁADOWE_PYTANIA.map((pytanie, i) => (
+                <button
+                  key={i}
+                  onClick={() => sendMessage(pytanie)}
+                  style={{
+                    padding: "10px 16px", background: "#fff", border: "1px solid #c8e0d0",
+                    borderRadius: 20, fontSize: 13, cursor: "pointer", color: "#1a4731",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.06)"
+                  }}
+                >
+                  {pytanie}
+                </button>
+              ))}
+            </div>
           </div>
         )}
         {messages.map((msg, i) => (
-          <div key={i} style={{
-            display: "flex",
-            justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
-          }}>
+          <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
             <div style={{
               maxWidth: "70%", padding: "12px 16px", borderRadius: 16,
               background: msg.role === "user" ? "#1a4731" : "#fff",
               color: msg.role === "user" ? "#fff" : "#333",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-              fontSize: 15, lineHeight: 1.5,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.08)", fontSize: 15, lineHeight: 1.5,
             }}>
               {msg.content}
             </div>
@@ -73,13 +94,13 @@ export default function Home() {
       <div style={{ padding: 16, background: "#fff", borderTop: "1px solid #e0e0e0", display: "flex", gap: 8 }}>
         <input
           type="text"
-          placeholder="Wpisz wiadomość..."
+          placeholder="Wpisz pytanie..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           style={{ flex: 1, padding: "12px 16px", borderRadius: 24, border: "1px solid #ddd", fontSize: 15, outline: "none" }}
         />
-        <button onClick={sendMessage} disabled={loading} style={{
+        <button onClick={() => sendMessage()} disabled={loading} style={{
           padding: "12px 20px", background: "#1a4731", color: "#fff",
           border: "none", borderRadius: 24, fontSize: 15, cursor: "pointer"
         }}>
