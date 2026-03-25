@@ -9,14 +9,13 @@ export default function LoginPage() {
   const [step, setStep] = useState<"login" | "newPassword">("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNew1, setShowNew1] = useState(false);
+  const [showNew2, setShowNew2] = useState(false);
 
   const login = async () => {
-    if (!email || !password) {
-      setError("Wpisz email i hasło.");
-      return;
-    }
-    setLoading(true);
-    setError("");
+    if (!email || !password) { setError("Wpisz email i hasło."); return; }
+    setLoading(true); setError("");
     const res = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -24,26 +23,15 @@ export default function LoginPage() {
     });
     const data = await res.json();
     setLoading(false);
-    if (data.firstLogin) {
-      setStep("newPassword");
-    } else if (data.success) {
-      window.location.href = "/";
-    } else {
-      setError(data.error || "Błąd logowania.");
-    }
+    if (data.firstLogin) setStep("newPassword");
+    else if (data.success) window.location.href = "/";
+    else setError(data.error || "Błąd logowania.");
   };
 
   const setNewPass = async () => {
-    if (newPassword.length < 8) {
-      setError("Hasło musi mieć minimum 8 znaków.");
-      return;
-    }
-    if (newPassword !== newPassword2) {
-      setError("Hasła nie są takie same.");
-      return;
-    }
-    setLoading(true);
-    setError("");
+    if (newPassword.length < 8) { setError("Hasło musi mieć minimum 8 znaków."); return; }
+    if (newPassword !== newPassword2) { setError("Hasła nie są takie same."); return; }
+    setLoading(true); setError("");
     const res = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -51,12 +39,20 @@ export default function LoginPage() {
     });
     const data = await res.json();
     setLoading(false);
-    if (data.success) {
-      window.location.href = "/";
-    } else {
-      setError(data.error || "Błąd.");
-    }
+    if (data.success) window.location.href = "/";
+    else setError(data.error || "Błąd.");
   };
+
+  const Eye = ({ show, toggle }: { show: boolean; toggle: () => void }) => (
+    <button onClick={toggle} type="button" style={{
+      position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
+      background: "none", border: "none", cursor: "pointer", color: "#888", fontSize: 18
+    }}>
+      {show ? "🙈" : "👁️"}
+    </button>
+  );
+
+  const inputBox = { width: "100%", padding: "12px 44px 12px 16px", borderRadius: 8, border: "1px solid #ddd", fontSize: 15, boxSizing: "border-box" as const };
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f0f4f0" }}>
@@ -71,20 +67,19 @@ export default function LoginPage() {
           <>
             <p style={{ color: "#444", marginBottom: 16, fontSize: 14 }}>Wpisz swój służbowy email i hasło.</p>
             <input
-              type="email"
-              placeholder="imie@eco-team.net"
-              value={email}
+              type="email" placeholder="imie@eco-team.net" value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={{ width: "100%", padding: "12px 16px", borderRadius: 8, border: "1px solid #ddd", fontSize: 15, marginBottom: 12, boxSizing: "border-box" }}
+              style={{ ...inputBox, padding: "12px 16px", marginBottom: 12 }}
             />
-            <input
-              type="password"
-              placeholder="Hasło"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && login()}
-              style={{ width: "100%", padding: "12px 16px", borderRadius: 8, border: "1px solid #ddd", fontSize: 15, marginBottom: 12, boxSizing: "border-box" }}
-            />
+            <div style={{ position: "relative", marginBottom: 12 }}>
+              <input
+                type={showPassword ? "text" : "password"} placeholder="Hasło" value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && login()}
+                style={inputBox}
+              />
+              <Eye show={showPassword} toggle={() => setShowPassword(!showPassword)} />
+            </div>
             {error && <p style={{ color: "red", fontSize: 13 }}>{error}</p>}
             <button onClick={login} disabled={loading} style={{ width: "100%", padding: 14, background: loading ? "#aaa" : "#1a4731", color: "#fff", border: "none", borderRadius: 8, fontSize: 15, cursor: "pointer" }}>
               {loading ? "Logowanie..." : "Zaloguj się"}
@@ -94,21 +89,23 @@ export default function LoginPage() {
           <>
             <p style={{ color: "#1a4731", fontWeight: "bold", marginBottom: 8 }}>Pierwsze logowanie!</p>
             <p style={{ color: "#444", marginBottom: 16, fontSize: 14 }}>Ustaw swoje własne hasło (min. 8 znaków).</p>
-            <input
-              type="password"
-              placeholder="Nowe hasło"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              style={{ width: "100%", padding: "12px 16px", borderRadius: 8, border: "1px solid #ddd", fontSize: 15, marginBottom: 12, boxSizing: "border-box" }}
-            />
-            <input
-              type="password"
-              placeholder="Powtórz nowe hasło"
-              value={newPassword2}
-              onChange={(e) => setNewPassword2(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && setNewPass()}
-              style={{ width: "100%", padding: "12px 16px", borderRadius: 8, border: "1px solid #ddd", fontSize: 15, marginBottom: 12, boxSizing: "border-box" }}
-            />
+            <div style={{ position: "relative", marginBottom: 12 }}>
+              <input
+                type={showNew1 ? "text" : "password"} placeholder="Nowe hasło" value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                style={inputBox}
+              />
+              <Eye show={showNew1} toggle={() => setShowNew1(!showNew1)} />
+            </div>
+            <div style={{ position: "relative", marginBottom: 12 }}>
+              <input
+                type={showNew2 ? "text" : "password"} placeholder="Powtórz nowe hasło" value={newPassword2}
+                onChange={(e) => setNewPassword2(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && setNewPass()}
+                style={inputBox}
+              />
+              <Eye show={showNew2} toggle={() => setShowNew2(!showNew2)} />
+            </div>
             {error && <p style={{ color: "red", fontSize: 13 }}>{error}</p>}
             <button onClick={setNewPass} disabled={loading} style={{ width: "100%", padding: 14, background: loading ? "#aaa" : "#1a4731", color: "#fff", border: "none", borderRadius: 8, fontSize: 15, cursor: "pointer" }}>
               {loading ? "Zapisywanie..." : "Ustaw hasło i zaloguj się"}
