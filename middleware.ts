@@ -2,15 +2,18 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const isLoginPage = request.nextUrl.pathname === "/login";
-  const isAuthApi = request.nextUrl.pathname.startsWith("/api/auth");
+  const { pathname } = request.nextUrl;
 
-  if (isAuthApi) return NextResponse.next();
+  if (
+    pathname.startsWith("/api/") ||
+    pathname.startsWith("/_next/") ||
+    pathname === "/favicon.ico"
+  ) {
+    return NextResponse.next();
+  }
 
-  const session =
-    request.cookies.get("better-auth.session_token") ||
-    request.cookies.get("session_token") ||
-    request.cookies.get("__Secure-better-auth.session_token");
+  const isLoginPage = pathname === "/login";
+  const session = request.cookies.get("eco-session");
 
   if (!session && !isLoginPage) {
     return NextResponse.redirect(new URL("/login", request.url));
